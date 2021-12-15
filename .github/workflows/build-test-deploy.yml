@@ -76,14 +76,17 @@ jobs:
       - run: >
           conan create
           --build=missing
+          --profile:build build/${{ runner.os }}
+          --profile:host game
           -o ${{ steps.recipe.outputs.name }}:build_tests=True
-          -pr game
           -s compiler.cppstd=${{ matrix.cppstd }}
           conan/ ${{ steps.recipe.outputs.reference }}@
 
       - name: Prepare virtual run env
         run: >
           conan install -g virtualrunenv
+          --profile:build build/${{ runner.os }}
+          --profile:host game
           -o ${{ steps.recipe.outputs.name }}:build_tests=True
           -s compiler.cppstd=${{ matrix.cppstd }}
           ${{ steps.recipe.outputs.reference }}@
@@ -105,10 +108,10 @@ jobs:
         # see: https://github.community/t/multiline-commands-on-windows-do-not-fail-if-individual-commands-fail/16753
         shell: cmd
 
-      - name: Deploy recipe (develop)
-        if: ${{ success() && contains('refs/heads/develop', github.ref) }}
-        run: |
-          conan user -p ${{ secrets.CONAN_USER_PASSWORD }} -r adnn ${{ secrets.CONAN_USER_NAME }}
-          conan copy --all ${{ steps.recipe.outputs.reference }} ${CONAN_DEV_USER_CHANNEL}
-          conan upload -r adnn --confirm ${{ steps.recipe.outputs.reference }}@${CONAN_DEV_USER_CHANNEL}
-        shell: bash
+      #- name: Deploy recipe (develop)
+      #  if: ${{ success() && contains('refs/heads/develop', github.ref) }}
+      #  run: |
+      #    conan user -p ${{ secrets.CONAN_USER_PASSWORD }} -r adnn ${{ secrets.CONAN_USER_NAME }}
+      #    conan copy --all ${{ steps.recipe.outputs.reference }} ${CONAN_DEV_USER_CHANNEL}
+      #    conan upload -r adnn --confirm ${{ steps.recipe.outputs.reference }}@${CONAN_DEV_USER_CHANNEL}
+      #  shell: bash
